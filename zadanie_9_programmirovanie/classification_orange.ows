@@ -1,0 +1,68 @@
+<?xml version='1.0' encoding='utf-8'?>
+<scheme version="2.0" title="Классификация персонажей НРИ (D&amp;D 5e)" description="Три метода классификации с учителем: Дерево решений, Наивный Байес, Случайный лес. Задача: предсказать difficulty (Easy/Medium/Hard) по параметрам NPC.">
+	<nodes>
+		<node id="0"  name="File"             qualified_name="Orange.widgets.data.owfile.OWFile"                                        project_name="Orange3" version="" title="Загрузка данных (CSV)"            position="(80,  300)" />
+		<node id="1"  name="Select Columns"   qualified_name="Orange.widgets.data.owselectcolumns.OWSelectAttributes"                  project_name="Orange3" version="" title="Признаки + целевая переменная"   position="(270, 300)" />
+		<node id="2"  name="Data Sampler"     qualified_name="Orange.widgets.data.owdatasampler.OWDataSampler"                          project_name="Orange3" version="" title="Train 80% / Test 20%"            position="(460, 300)" />
+		<node id="3"  name="Tree"             qualified_name="Orange.widgets.model.owtree.OWTreeLearner"                               project_name="Orange3" version="" title="Дерево решений (max_depth=5)"    position="(660, 160)" />
+		<node id="4"  name="Naive Bayes"      qualified_name="Orange.widgets.model.ownaivebayes.OWNaiveBayes"                          project_name="Orange3" version="" title="Наивный Байес"                   position="(660, 300)" />
+		<node id="5"  name="Random Forest"    qualified_name="Orange.widgets.model.owrandomforest.OWRandomForest"                      project_name="Orange3" version="" title="Случайный лес (n=100)"          position="(660, 440)" />
+		<node id="6"  name="Test and Score"   qualified_name="Orange.widgets.evaluate.owtestandscore.OWTestAndScore"                   project_name="Orange3" version="" title="Оценка: CA, AUC, F1"            position="(870, 300)" />
+		<node id="7"  name="Confusion Matrix" qualified_name="Orange.widgets.evaluate.owconfusionmatrix.OWConfusionMatrix"             project_name="Orange3" version="" title="Матрица ошибок"                 position="(1070, 180)" />
+		<node id="8"  name="ROC Analysis"     qualified_name="Orange.widgets.evaluate.owrocanalysis.OWROCAnalysis"                     project_name="Orange3" version="" title="ROC-кривые"                     position="(1070, 300)" />
+		<node id="9"  name="Tree Viewer"      qualified_name="Orange.widgets.visualize.owtreeviewer.OWTreeGraph"                       project_name="Orange3" version="" title="Структура дерева решений"       position="(870, 160)" />
+		<node id="10" name="Predictions"      qualified_name="Orange.widgets.evaluate.owpredictions.OWPredictions"                    project_name="Orange3" version="" title="Предсказания на тест. выборке"  position="(870, 440)" />
+		<node id="11" name="Data Table"       qualified_name="Orange.widgets.data.owtable.OWDataTable"                                project_name="Orange3" version="" title="Таблица предсказаний"           position="(1070, 440)" />
+	</nodes>
+	<links>
+		<link id="0"  source_node_id="0"  sink_node_id="1"  source_channel="Data"               sink_channel="Data"               enabled="true" />
+		<link id="1"  source_node_id="1"  sink_node_id="2"  source_channel="Data"               sink_channel="Data"               enabled="true" />
+		<link id="2"  source_node_id="2"  sink_node_id="3"  source_channel="Data Sample"        sink_channel="Data"               enabled="true" />
+		<link id="3"  source_node_id="2"  sink_node_id="4"  source_channel="Data Sample"        sink_channel="Data"               enabled="true" />
+		<link id="4"  source_node_id="2"  sink_node_id="5"  source_channel="Data Sample"        sink_channel="Data"               enabled="true" />
+		<link id="5"  source_node_id="3"  sink_node_id="6"  source_channel="Learner"            sink_channel="Learner"            enabled="true" />
+		<link id="6"  source_node_id="4"  sink_node_id="6"  source_channel="Learner"            sink_channel="Learner"            enabled="true" />
+		<link id="7"  source_node_id="5"  sink_node_id="6"  source_channel="Learner"            sink_channel="Learner"            enabled="true" />
+		<link id="8"  source_node_id="2"  sink_node_id="6"  source_channel="Remaining Data"     sink_channel="Test Data"          enabled="true" />
+		<link id="9"  source_node_id="6"  sink_node_id="7"  source_channel="Evaluation Results" sink_channel="Evaluation Results" enabled="true" />
+		<link id="10" source_node_id="6"  sink_node_id="8"  source_channel="Evaluation Results" sink_channel="Evaluation Results" enabled="true" />
+		<link id="11" source_node_id="3"  sink_node_id="9"  source_channel="Model"              sink_channel="Tree"               enabled="true" />
+		<link id="12" source_node_id="2"  sink_node_id="10" source_channel="Remaining Data"     sink_channel="Data"               enabled="true" />
+		<link id="13" source_node_id="3"  sink_node_id="10" source_channel="Model"              sink_channel="Predictors"         enabled="true" />
+		<link id="14" source_node_id="4"  sink_node_id="10" source_channel="Model"              sink_channel="Predictors"         enabled="true" />
+		<link id="15" source_node_id="5"  sink_node_id="10" source_channel="Model"              sink_channel="Predictors"         enabled="true" />
+		<link id="16" source_node_id="10" sink_node_id="11" source_channel="Predictions"        sink_channel="Data"               enabled="true" />
+	</links>
+	<annotations>
+		<text id="0" type="text/plain" rect="(30, 30, 330, 100)" font-family="Helvetica" font-size="12">
+БЛОК 1: ДАННЫЕ
+Загрузите CSV с параметрами NPC/монстров:
+HP, AC, STR, DEX, CON, INT, WIS, CHA, CR, attack_bonus.
+Целевая переменная (class): difficulty (Easy / Medium / Hard).
+Data Sampler: стратифицированное разбиение 80% / 20%.</text>
+		<text id="1" type="text/plain" rect="(580, 30, 290, 110)" font-family="Helvetica" font-size="12">
+БЛОК 2: КЛАССИФИКАТОРЫ (раздел "Model")
+• Tree — OWTreeLearner, max_depth=5
+• Naive Bayes — OWNaiveBayes
+• Random Forest — OWRandomForest, n=100
+Каждый отдаёт:
+  Learner → Test and Score
+  Model   → Predictions + Tree Viewer</text>
+		<text id="2" type="text/plain" rect="(820, 30, 330, 100)" font-family="Helvetica" font-size="12">
+БЛОК 3: ОЦЕНКА
+Test and Score → CA, AUC, F1, Precision, Recall
+  → Confusion Matrix
+  → ROC Analysis
+Predictions: тестовые Data + три Model (Predictors)
+  → Data Table (сравнение трёх моделей)</text>
+	</annotations>
+	<thumbnail />
+	<node_properties>
+		<properties node_id="0" format="literal">{'saved_state': None, 'recent_paths': [], 'sheet': '', 'source': 0}</properties>
+		<properties node_id="2" format="literal">{'sampling_type': 0, 'sampleSizeNumber': 1, 'sampleSizePercentage': 80, 'sampleSizePercentageStratified': 80, 'stratified': True, 'random_state': 42, 'replacement': False, 'number_of_folds': 10, 'selectedFold': 1}</properties>
+		<properties node_id="3" format="literal">{'max_depth': 5, 'min_samples_split': 5, 'sufficient_majority': 0.95, 'index_step': 0, 'limit_depth': True, 'limit_min_leaf': True, 'limit_majority': True, 'auto_apply': True, '__version__': 1}</properties>
+		<properties node_id="4" format="literal">{'auto_apply': True, '__version__': 1}</properties>
+		<properties node_id="5" format="literal">{'auto_apply': True, 'n_estimators': 100, 'use_max_depth': False, 'max_depth': 3, 'use_max_features': False, 'max_features': 5, 'use_min_samples_split': True, 'min_samples_split': 5, 'index_seed': 0, 'class_weight': False, '__version__': 1}</properties>
+		<properties node_id="6" format="literal">{'resampling': 0, 'k_folds': 10, 'stratified': True, 'shuffle': False, 'random_state': 0, 'n_repeats': 3, 'sample_size': 9, 'use_default_learner': False}</properties>
+	</node_properties>
+</scheme>
